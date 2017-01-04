@@ -2,62 +2,96 @@ import React from 'react';
 import { observer } from 'mobx-react';
 import { observable, action } from 'mobx';
 import { Form, FormGroup, FormControl, Button, Col, ControlLabel } from 'react-bootstrap';
-import { getQueryParameterByName, getAddressFromPrivateKey}  from "../utils";
+
+import { getQueryParameterByName }  from "../utils";
 import AccountInfo from "./AccountInfo";
+import TransactionData from "./TransactionData";
+import { API } from "../etherscan";
+import { getAddressFromPrivateKey } from "../txbuilder";
 
 
-// Fetch signer state from URL/localStorage on app init
-const url = window.location.href;
+/**
+ * Transaction builder user interface.
+ */
+@observer
+class Signer extends React.Component {
 
+  constructor(props) {
 
-let privateKey = getQueryParameterByName("privateKey", url) || window.localStorage.getItem("privateKey") || "";
+    super(props);
 
-// Define the state of the signing demo componen
-let state = observable({
-  apiURL: "https://testnet.etherscan.io/api",
-  privateKey: privateKey,
-  contractAddress: getQueryParameterByName("privateKey", url) || window.localStorage.getItem("contractAddress") || "0xe0b79b3d705cd09435475904bf54520929eae4e8",
-  apiKey: getQueryParameterByName("apiKey", url) || window.localStorage.getItem("apiKey") || "",
-  functionSignature: window.localStorage.getItem("functionSignature") || "setAmount(uint)",
-  functionParameters: window.localStorage.getItem("functionParameters") || "2000",
-  address: getAddressFromPrivateKey(privateKey) || "",
-  balance: "",
-  rawTx: "",
-});
+    // Fetch signer state from URL/localStorage on app init
+    const url = window.location.href;
+    const privateKey = getQueryParameterByName("privateKey", url) || window.localStorage.getItem("privateKey") || "";
 
-
-// Show the built and sent transaction
-function TransactionData({ state }) {
-  return (
-    <div>
-      <hr />
-
-      <h3>Transaction data</h3>
-
-      <FormGroup controlId="rawTx">
-
-        <Col componentClass={ControlLabel} sm={2}>
-          Raw transaction
-        </Col>
-
-        <Col sm={10}>
-          <FormControl componentClass="textarea" value={state.rawTx} disabled />
-        </Col>
-
-      </FormGroup>
-    </div>
-  )
-}
-
-
-function Signer() {
-
-  function sendTransaction() {
-    let rawTx = build
+    // Define the state of the signing demo componen
+    this.state = observable({
+      apiURL: "https://testnet.etherscan.io/api",
+      privateKey: privateKey,
+      contractAddress: getQueryParameterByName("privateKey", url) || window.localStorage.getItem("contractAddress") || "0xe0b79b3d705cd09435475904bf54520929eae4e8",
+      apiKey: getQueryParameterByName("apiKey", url) || window.localStorage.getItem("apiKey") || "",
+      functionSignature: window.localStorage.getItem("functionSignature") || "setAmount(uint)",
+      functionParameters: window.localStorage.getItem("functionParameters") || "2000",
+      address: getAddressFromPrivateKey(privateKey) || "",
+      balance: "",
+      rawTx: "",
+      nonce: "",
+    });
   }
 
-  function onChange(event) {
+  componentDidMount() {
 
+    const updateAddressData = this.updateAddressData.bind(this);
+
+    async function init() {
+      await updateAddressData();
+    }
+
+    init();
+  }
+
+  sendTransaction() {
+    state.rawTx = buildTx(state.contractAddress, state.privateKey, state.functionSignature, state.functionParameters);
+  }
+
+  @action
+  setAddressData(address, balance, nonce) {
+    this.state.address = address;
+    this.state.balance = balance;
+    this.state.nonce = nonce;
+    console.log(balance, nonce);
+  }
+
+  // Update the Ethereum address balanc from etherscan.io API
+  async updateAddressData() {
+
+    let state = this.state;
+    let address = getAddressFromPrivateKey(state.privateKey);
+
+    console.log("Address for private key", state.privateKey, "is", state.address);
+
+    if(!address) {
+      this.setAddressData("Could not resolve address", "", "");
+      return;
+    } else {
+      state.address = address;
+    }
+
+    console.log("Updating address information for", address, state);
+
+    if(!address || !state.apiKey) {
+      // No address available
+      return;
+    }
+    const api = new API(state.apiURL, state.apiKey);
+    const balance = await api.getBalance(address) || "";
+    const nonce = await api.getTransactionCount(address) || "";
+    this.setAddressData(address, balance, nonce);
+  }
+
+  onChange(event) {
+
+    let state = this.state;
     let name = event.target.id;
     let value = event.target.value;
 
@@ -69,92 +103,100 @@ function Signer() {
     window.localStorage.setItem(name, value);
   }
 
-  async function onPrivateKeyChange(event) {
-    onChange(event);
-    state.address = getAddressFromPrivateKey(state.privateKey) || "";
-    updateBalance();
+  onPrivateKeyChange(event) {
+    let state = this.state;
+    this.onChange(event);
+    this.updateAddressData();
   }
 
-  return (
-    <Form horizontal>
+  render() {
 
-      <h1>Transaction parameters</h1>
+    const state = this.state;
+    const onPrivateKeyChange = this.onPrivateKeyChange.bind(this);
+    const onChange = this.onChange.bind(this);
+    const sendTransaction = this.sendTransaction.bind(this);
 
-      <p>Ethereum Ropsten testnet only</p>
+    return (
+      <Form horizontal>
 
-      <FormGroup controlId="apiKey">
+        <h1>Transaction parameters</h1>
 
-        <Col componentClass={ControlLabel} sm={2}>
-          Etherscan.io API key
-        </Col>
+        <p>Ethereum Ropsten testnet only</p>
 
-        <Col sm={10}>
-          <FormControl type="text" value={state.apiKey} onChange={onChange} />
-        </Col>
+        <FormGroup controlId="apiKey">
 
-      </FormGroup>
+          <Col componentClass={ControlLabel} sm={2}>
+            Etherscan.io API key
+          </Col>
 
-      <FormGroup controlId="contractAddress">
+          <Col sm={10}>
+            <FormControl type="text" value={state.apiKey} onChange={onChange} />
+          </Col>
 
-        <Col componentClass={ControlLabel} sm={2}>
-          Contract address
-        </Col>
+        </FormGroup>
 
-        <Col sm={10}>
-          <FormControl type="text" value={state.contractAddress} onChange={onChange} />
-        </Col>
+        <FormGroup controlId="contractAddress">
 
-      </FormGroup>
+          <Col componentClass={ControlLabel} sm={2}>
+            Contract address
+          </Col>
 
-      <FormGroup controlId="privateKey">
+          <Col sm={10}>
+            <FormControl type="text" value={state.contractAddress} onChange={onChange} />
+          </Col>
 
-        <Col componentClass={ControlLabel} sm={2}>
-          Private key
-        </Col>
+        </FormGroup>
 
-        <Col sm={10}>
-          <FormControl type="text" value={state.privateKey} onChange={onPrivateKeyChange} />
-        </Col>
+        <FormGroup controlId="privateKey">
 
-      </FormGroup>
+          <Col componentClass={ControlLabel} sm={2}>
+            Private key
+          </Col>
 
-      <FormGroup controlId="functionSignature">
+          <Col sm={10}>
+            <FormControl type="text" value={state.privateKey} onChange={onPrivateKeyChange} />
+          </Col>
 
-        <Col componentClass={ControlLabel} sm={2}>
-          Function signature
-        </Col>
+        </FormGroup>
 
-        <Col sm={10}>
-          <FormControl type="text" value={state.functionSignature} onChange={onChange} />
-        </Col>
+        <FormGroup controlId="functionSignature">
 
-      </FormGroup>
+          <Col componentClass={ControlLabel} sm={2}>
+            Function signature
+          </Col>
 
-      <FormGroup controlId="functionSignature">
+          <Col sm={10}>
+            <FormControl type="text" value={state.functionSignature} onChange={onChange} />
+          </Col>
 
-        <Col componentClass={ControlLabel} sm={2}>
-          Function parameters
-        </Col>
+        </FormGroup>
 
-        <Col sm={10}>
-          <FormControl type="text" value={state.functionParameters} onChange={onChange} />
-          <p className="text-muted">Comma separated list</p>
-        </Col>
+        <FormGroup controlId="functionSignature">
 
-      </FormGroup>
+          <Col componentClass={ControlLabel} sm={2}>
+            Function parameters
+          </Col>
 
-      <Button bsStyle="primary" onClick={sendTransaction}>Send transaction</Button>
+          <Col sm={10}>
+            <FormControl type="text" value={state.functionParameters} onChange={onChange} />
+            <p className="text-muted">Comma separated list</p>
+          </Col>
 
-      <AccountInfo state={state} />
+        </FormGroup>
 
-      {state.rawTx && <TransactionData />}
+        <Button bsStyle="primary" onClick={sendTransaction}>Send transaction</Button>
 
-    </Form>
-  );
+        {state.rawTx && <TransactionData state={state} />}
+
+        <AccountInfo state={state} />
+
+      </Form>
+    );
+  }
 }
 
 Signer.propTypes = {
   store: React.PropTypes.object,
 };
 
-export default observer(Signer);
+export default Signer;

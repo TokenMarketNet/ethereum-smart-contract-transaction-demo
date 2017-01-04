@@ -15,32 +15,7 @@ class AccountInfo extends React.Component {
   }
 
   componentDidMount() {
-
     let state = this.state;
-
-    // Update the Ethereum address balanc from etherscan.io API
-    async function updateBalance() {
-
-      function setBalance(balance) {
-        console.log("New balance is ", balance);
-        state.balance = balance;
-      }
-      setBalance = action(setBalance);
-
-      if(!state.address || !state.apiKey) {
-        // No address available
-        return;
-      }
-      const api = new API(state.apiURL, state.apiKey);
-      const balance = await api.getBalance(state.address);
-
-      if(balance !== null) {
-        setBalance(balance);
-      } else {
-        setBalance("");
-      }
-    }
-    updateBalance();
   }
 
   render() {
@@ -56,7 +31,7 @@ class AccountInfo extends React.Component {
         <FormGroup controlId="address">
 
           <Col componentClass={ControlLabel} sm={2}>
-            Address
+            Private key address
           </Col>
 
           <Col sm={10}>
@@ -77,6 +52,20 @@ class AccountInfo extends React.Component {
             <FormControl type="text" value={state.balance} disabled />
 
             <p className="text-muted">Automatically fetches the Ethereum account.</p>
+          </Col>
+
+        </FormGroup>
+
+        <FormGroup controlId="balance">
+
+          <Col componentClass={ControlLabel} sm={2}>
+            Nonce
+          </Col>
+
+          <Col sm={10}>
+            <FormControl type="text" value={state.nonce} disabled />
+
+            <p className="text-muted">Automatically increased for each transaction.</p>
           </Col>
 
         </FormGroup>

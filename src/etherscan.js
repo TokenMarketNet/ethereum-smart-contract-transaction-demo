@@ -32,12 +32,7 @@ export class API {
     let data = await response.json();
 
     console.log("API result", data);
-
-    if(data.status == "1") {
-      return data.result;
-    } else {
-      return null;
-    }
+    return data.result;
   }
 
   /**
@@ -60,5 +55,24 @@ export class API {
     } else {
       return balance;
     }
+  }
+
+  /**
+   * Get sent transaction count.
+   *
+   * Also can be used as a nonce.
+   *
+   * @param address
+   */
+  async getTransactionCount(address) {
+    let params = {
+      apikey: this.apiKey,
+      module: "proxy",
+      action: "eth_GetTransactionCount",
+      address: address,
+      tag: "latest",
+    };
+    const count = await this.makeRequest(params);
+    return count;
   }
 };
