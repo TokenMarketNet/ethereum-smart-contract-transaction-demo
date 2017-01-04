@@ -48,6 +48,7 @@
     "html-webpack-plugin": "^2.15.0",
     "npm-install-webpack-plugin": "^4.0.0",
     "rimraf": "^2.5.0",
+    "sleep": "^5.0.0",
     "style-loader": "^0.13.0",
     "url-loader": "^0.5.0",
     "webpack": "^1.12.0",

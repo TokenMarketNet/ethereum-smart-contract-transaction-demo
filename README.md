@@ -2,9 +2,11 @@
  
 ## Introduction 
  
-This demo app demostrates how to deploy an Ethereum smart contract and then call this contract functions from a web user interface. There is a demo app written using React and Bootstrap that can call an arbitrary Ethereum contract using Etherscan.io API service. The application is coded in ECMAScript 2016 and put together using Webpack.
+This demo app demostrates how to deploy an Ethereum smart contract and call arbitrary contract functions from a web user interface. For the deployment of the contract Go Ethereum is used. For the API calls Etherscan.IO API service is used.
 
-All keys are held 100% client side and transaction is constructed in JavaScript, making the example optimal for non-custodian wallets and Dapps. 
+There is a demo app written using React and Bootstrap. The application is coded in ECMAScript 2016 and wrapped together using Webpack.
+
+All keys are held 100% client side and transaction is constructed in JavaScript, making the example optimal to follow if you are working with non-custodian wallets or Dapps. 
 
 We use both command line Node.js tools and browser based JavaScript in this demo.
 
@@ -13,6 +15,8 @@ We use both command line Node.js tools and browser based JavaScript in this demo
 You need to be comfortable in advanced JavaScript programming. You need to have geth (Go-Ethereum) node or any Ethereum node software running in a Ethereum Ropsten testnet. See below how to install and connect to one safely.
 
 ## Features 
+
+* Interact with Ethereum blockchain over both Go-Ethereum JSON-RPC connection and EtherScan.io API
 
 * Deploy a smart contract from command line
 
@@ -46,6 +50,55 @@ You can run geth on a server (2GB VPS) and then connect it to using SSH tunnelin
 [See here how to deploy geth securely on a server and then build a SSH tunnel from your local development computer to server running geth](https://gist.github.com/miohtama/ce612b35415e74268ff243af645048f4)
 
 [See another blog post how to set up geth with password protected JSON RPC ](https://tokenmarket.net/blog/protecting-ethereum-json-rpc-api-with-password/)
+
+## Creating a private key
+
+The demo app has a text input that directly takes your Ethereum account private key.
+
+A private key is just a 256 bit number. You can generate one easily from a passphrase using sha3 hash in node console.
+
+First launch node.js:
+    
+    node
+    
+Then generate a private key from a passphrase in Nod console:
+    
+    Web3 = require("Web3");
+    web3 = new Web3();
+    
+    privateKeyRaw = web3.sha3("Toholampi is the best town on the world");
+    '0x4fe8deb1d5e5908bd05bf8b8aad6f3a5fbce70a95e3f65fe85cbe6d3f4e44f77'
+    
+To get a matching Ethereum address for your private key:
+
+    Wallet = require("ethers-wallet");
+    wallet = new Wallet(privateKeyRaw);
+    wallet.address
+    '0x062Abe5fbaEf147d765C40F73aB31a6B05aEb8Ca'
+     
+## Transferring ETH on your private key address
+    
+Make sure JSON-RPC is available on `http://localhost:8545`.
+    
+Connect to your geth and send some balance from geth coinbase address to this address:
+    
+    geth attach http://localhost:8545
+
+Check your coinbase address has some balance:
+
+    web3.eth.getBalance(web3.eth.coinbase)
+    181147570016639999999
+    
+Unlock your coinbase account so that you can do withdraws from it:
+    
+    web3.personal.unlockAccount(web3.eth.coinbase);
+
+Transfer 0.1 ETH to your private key address as generated above:
+ 
+    web3.eth.sendTransaction({from: web3.eth.coinbase, to: '0x062Abe5fbaEf147d765C40F73aB31a6B05aEb8Ca', amount: web3.toWei("0.1", "ether")});
+    "0x41f6c6fbdfd4184172d61b390922270db087519137c43d3052fbad33876964f7"
+
+[See my demo transaction in Etherscan Ropsten explorer](https://testnet.etherscan.io/tx/0x41f6c6fbdfd4184172d61b390922270db087519137c43d3052fbad33876964f7).
 
 ## Creating a smart contract
 
@@ -85,63 +138,92 @@ solc SampleContract.sol --combined-json abi,asm,ast,bin,bin-runtime,clone-bin,de
 Then you can deploy the contract using the attached `deploy.js` script.
 
 ```console
-node deploy.js
+node --harmony-async-await  deploy.js
 ```
 
 The sample deployment script is a JavaScript script that reads contract ABI definitions and communicates with geth over JSON-RPC using web3 wrapper:
 
 ```javascript
-let fs = require("fs");
-let Web3 = require('web3');
+// Copyright 2017 https://tokenmarket.net - MIT licensed
+//
+// Run with Node 7.x as:
+//
+// node --harmony-async-await  deploy.js
+//
 
-// https://www.npmjs.com/package/web3
+let fs = require("fs");
+let Web3 = require('web3'); // https://www.npmjs.com/package/web3
+
+// Create a web3 connection to a running geth node over JSON-RPC running at
+// http://localhost:8545
+// For geth VPS server + SSH tunneling see
+// https://gist.github.com/miohtama/ce612b35415e74268ff243af645048f4
 let web3 = new Web3();
 web3.setProvider(new web3.providers.HttpProvider('http://localhost:8545'));
 
+// Read the compiled contract code
+// Compile with
+// solc SampleContract.sol --combined-json abi,asm,ast,bin,bin-runtime,clone-bin,devdoc,interface,opcodes,srcmap,srcmap-runtime,userdoc > contracts.json
 let source = fs.readFileSync("contracts.json");
 let contracts = JSON.parse(source)["contracts"];
 
-let SampleContract = web3.eth.contract(contracts.SampleContract.abi);
+// ABI description as JSON structure
+let abi = JSON.parse(contracts.SampleContract.abi);
 
-// https://github.com/ethereum/wiki/wiki/JavaScript-API
+// Smart contract EVM bytecode as hex
+let code = contracts.SampleContract.bin;
+
+// Create Contract proxy class
+let SampleContract = web3.eth.contract(abi);
+
+// Unlock the coinbase account to make transactions out of it
+console.log("Unlocking coinbase account");
+var password = "";
+try {
+  web3.personal.unlockAccount(web3.eth.coinbase, password);
+} catch(e) {
+  console.log(e);
+  return;
+}
+
 console.log("Deploying the contract");
-let contractInstance = SampleContract.new({from: web3.eth.coinbase, gas: 1000000});
+let contract = SampleContract.new({from: web3.eth.coinbase, gas: 1000000, data: code});
+
+// Transaction has entered to geth memory pool
+console.log("Your contract is being deployed in transaction at http://testnet.etherscan.io/tx/" + contract.transactionHash);
+
+// http://stackoverflow.com/questions/951021/what-is-the-javascript-version-of-sleep
+function sleep(ms) {
+  return new Promise(resolve => setTimeout(resolve, ms));
+}
+
+// We need to wait until any miner has included the transaction
+// in a block to get the address of the contract
+async function waitBlock() {
+  while (true) {
+    let receipt = web3.eth.getTransactionReceipt(contract.transactionHash);
+    if (receipt && receipt.contractAddress) {
+      console.log("Your contract has been deployed at http://testnet.etherscan.io/address/" + receipt.contractAddress);
+      console.log("Note that it might take 30 - 90 sceonds for the block to propagate befor it's visible in etherscan.io");
+      break;
+    }
+    console.log("Waiting a mined block to include your contract... currently in block " + web3.eth.blockNumber);
+    await sleep(4000);
+  }
+}
+
+waitBlock();
 ```
 
-## Creating a private key
+[See a sample deployed contract](https://testnet.etherscan.io/address/0xe0b79b3d705cd09435475904bf54520929eae4e8#code)
 
-The demo app has a text input that directly takes your Ethereum account private key.
+## Create Etherscan.io API key
 
-A private key is just a 256 bit number. You can generate one easily from a passphrase using sha3 hash in node console.
-
-First launch node.js:
-    
-    node
-    
-Then generate a private key from a passphrase in Nod console:
-    
-    Web3 = require("Web3");
-    web3 = new Web3();
-    
-    privateKeyRaw = web3.sha3("Toholampi is the best town on the world");
-    '0x4fe8deb1d5e5908bd05bf8b8aad6f3a5fbce70a95e3f65fe85cbe6d3f4e44f77'
-    
-To get a matching Ethereum address for your private key:
-
-    Wallet = require("ethers-wallet");
-    wallet = new Wallet(privateKeyRaw);
-    wallet.address
-    '0x062Abe5fbaEf147d765C40F73aB31a6B05aEb8Ca'
-     
-## Transferring some ETH on your private key address
-    
-Connect to your geth and send some balance from geth coinbase address to this address:
-    
-    
+[Sign up to Etherscan.io and create API key there](https://etherscan.io/)
 
 ## Building a contract call
 
-Now when your contract is deployed 
+Now when your contract is deployed, you have a private key to your account, you have your Etherscan.io API key, you can make some calls to 
 
 
 ## Used components
