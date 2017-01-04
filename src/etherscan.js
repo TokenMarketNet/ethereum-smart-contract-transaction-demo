@@ -4,6 +4,9 @@ require("babel-polyfill"); // http://stackoverflow.com/a/33527883/315168
 require('es6-promise').polyfill(); // https://github.com/matthew-andrews/isomorphic-fetch
 
 import fetch from 'isomorphic-fetch';
+import Web3 from 'web3';
+
+const web3 = new Web3();
 
 export class API {
 
@@ -37,6 +40,11 @@ export class API {
     }
   }
 
+  /**
+   * Return account balance as as Ether, a BigDecimal string.
+   * @param address
+   * @returns {*}
+   */
   async getBalance(address) {
     // https://api.etherscan.io/api?module=account&action=balance&address=0xddbd2b932c763ba5b1b7ae3b362eac3e8d40121a&tag=latest&apikey=YourApiKeyToken
     let params = {
@@ -46,6 +54,11 @@ export class API {
       address: address,
       tag: "latest",
     };
-    return this.makeRequest(params);
+    let balance = await this.makeRequest(params);
+    if(balance) {
+      return web3.fromWei(balance, "ether");
+    } else {
+      return balance;
+    }
   }
 };

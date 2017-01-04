@@ -95,7 +95,7 @@ Unlock your coinbase account so that you can do withdraws from it:
 
 Transfer 0.1 ETH to your private key address as generated above:
  
-    web3.eth.sendTransaction({from: web3.eth.coinbase, to: '0x062Abe5fbaEf147d765C40F73aB31a6B05aEb8Ca', amount: web3.toWei("0.1", "ether")});
+    web3.eth.sendTransaction({from: web3.eth.coinbase, to: '0x062Abe5fbaEf147d765C40F73aB31a6B05aEb8Ca', value: web3.toWei("0.1", "ether")});
     "0x41f6c6fbdfd4184172d61b390922270db087519137c43d3052fbad33876964f7"
 
 [See my demo transaction in Etherscan Ropsten explorer](https://testnet.etherscan.io/tx/0x41f6c6fbdfd4184172d61b390922270db087519137c43d3052fbad33876964f7).

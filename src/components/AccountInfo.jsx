@@ -39,9 +39,7 @@ class AccountInfo extends React.Component {
       } else {
         setBalance("");
       }
-
     }
-
     updateBalance();
   }
 
