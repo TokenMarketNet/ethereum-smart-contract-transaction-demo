@@ -2,7 +2,7 @@
  
 ## Introduction 
  
-This demo app demostrates how to deploy an Ethereum smart contract and call arbitrary contract functions from a web user interface. For the deployment of the contract Go Ethereum is used. For the API calls Etherscan.IO API service is used.
+This a tutorial blog post and demo app demostrates how to deploy an Ethereum smart contract and call arbitrary contract functions from a web user interface. For the deployment of the contract Go Ethereum is used. For the API calls Etherscan.IO API service is used.
 
 There is a demo app written using React and Bootstrap. The application is coded in ECMAScript 2016 and wrapped together using Webpack.
 
@@ -18,15 +18,15 @@ You need to be comfortable in advanced JavaScript programming. You need to have 
 
 * Interact with Ethereum blockchain over both Go-Ethereum JSON-RPC connection and EtherScan.io API
 
-* Deploy a smart contract from command line
+* Interact with smart contracts from web browser JavaScript
 
-* Create private and public key pair offline
+* Deploy a smart contract from a command line
 
-* Push transaction through etherscan.io API or optional work offline
+* Generate private and public key pair offline
+
+* Push transactions through etherscan.io API or optional sign tranactions offline
 
 * Sample Solidity contract source code
-
-* Fill in the smart contract call parameters from URL or window.localStorage
 
 ## Getting started 
 

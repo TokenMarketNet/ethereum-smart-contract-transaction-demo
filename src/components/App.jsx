@@ -22,7 +22,7 @@ class App extends React.Component {
                 <Navbar>
                   <Navbar.Header>
                     <Navbar.Brand>
-                      <a href="#">Ethereum Smart Contract Caller Demo</a>
+                      <a href="#">Ethereum Smart Contract Transaction Building Toy</a>
                     </Navbar.Brand>
                   </Navbar.Header>
                 </Navbar>

@@ -7,7 +7,7 @@ import { getQueryParameterByName }  from "../utils";
 import AccountInfo from "./AccountInfo";
 import TransactionData from "./TransactionData";
 import { API } from "../etherscan";
-import { getAddressFromPrivateKey } from "../txbuilder";
+import { getAddressFromPrivateKey, buildTx, calculateNonce } from "../txbuilder";
 
 
 /**
@@ -35,31 +35,61 @@ class Signer extends React.Component {
       address: getAddressFromPrivateKey(privateKey) || "",
       balance: "",
       rawTx: "",
-      nonce: "",
+      nonce: "", // Calculated nonce as int
+      sendStatus: false, // True when send in progress
+      sendError: null, //
+      sentTxHash: null, // Point to etherscan.io tx
+      baseNonce: 0, // How many txs has gone out from the address
+      nonceOffset: 1, // Maintain internal state of added nonces, because Etherscan getTransactionCount() cannot seem to be able to deal very well with uncorfirmed txs
     });
   }
 
+  // Refresh address data when the app is loaded
   componentDidMount() {
-
     const updateAddressData = this.updateAddressData.bind(this);
-
     async function init() {
       await updateAddressData();
     }
-
     init();
   }
 
+  // Handle Send transaction button
+  @action
   sendTransaction() {
-    state.rawTx = buildTx(state.contractAddress, state.privateKey, state.functionSignature, state.functionParameters);
+    const updateAddressData = this.updateAddressData.bind(this);
+    let state = this.state;
+    state.rawTx = buildTx(state);
+
+    async function _send() {
+
+      if(state.apiKey) {
+        state.sendStatus = true;
+        const api = new API(state.apiURL, state.apiKey);
+
+
+        try {
+          state.sentTxHash = await api.sendRaw(state.rawTx);
+          state.sendError = null;
+          console.log("Transaction sent, hash", state.sentTxHash);
+        } catch(e) {
+          state.sendError = "" + e;
+          console.log(e);
+        }
+
+        await updateAddressData();
+        state.sendStatus = false;
+      }
+    }
+
+    _send();
   }
 
+  // Update data about the address after fetched over API
   @action
   setAddressData(address, balance, nonce) {
     this.state.address = address;
     this.state.balance = balance;
     this.state.nonce = nonce;
-    console.log(balance, nonce);
   }
 
   // Update the Ethereum address balanc from etherscan.io API
@@ -85,10 +115,19 @@ class Signer extends React.Component {
     }
     const api = new API(state.apiURL, state.apiKey);
     const balance = await api.getBalance(address) || "";
-    const nonce = await api.getTransactionCount(address) || "";
+
+    state.baseNonce = await api.getTransactionCount(address) || "";
+    if(state.baseNonce) {
+      state.baseNonce = parseInt(state.baseNonce, 16);
+    }
+
+    state.nonceOffset += 1;
+    const nonce = calculateNonce(state.baseNonce, 0x100000, state.nonceOffset);
+
     this.setAddressData(address, balance, nonce);
   }
 
+  // Handle text changes in input fields
   onChange(event) {
 
     let state = this.state;
@@ -103,6 +142,7 @@ class Signer extends React.Component {
     window.localStorage.setItem(name, value);
   }
 
+  // Handle private kery edit
   onPrivateKeyChange(event) {
     let state = this.state;
     this.onChange(event);
@@ -119,7 +159,7 @@ class Signer extends React.Component {
     return (
       <Form horizontal>
 
-        <h1>Transaction parameters</h1>
+        <h1>Build a smart contract transaction</h1>
 
         <p>Ethereum Ropsten testnet only</p>
 
@@ -131,6 +171,10 @@ class Signer extends React.Component {
 
           <Col sm={10}>
             <FormControl type="text" value={state.apiKey} onChange={onChange} />
+            <p className="text-muted">
+              Sign up on <a target="_blank" href="https://etherscan.io">EtherScan.io</a>.
+            </p>
+
           </Col>
 
         </FormGroup>
@@ -143,6 +187,11 @@ class Signer extends React.Component {
 
           <Col sm={10}>
             <FormControl type="text" value={state.contractAddress} onChange={onChange} />
+
+            <p className="text-muted">
+              <a target="_blank" href={"https://testnet.etherscan.io/address/" + state.contractAddress}>View on EtherScan.io</a>.
+            </p>
+
           </Col>
 
         </FormGroup>
@@ -155,6 +204,10 @@ class Signer extends React.Component {
 
           <Col sm={10}>
             <FormControl type="text" value={state.privateKey} onChange={onPrivateKeyChange} />
+
+            <p className="text-muted">
+              Derived from a passphrase using sha3() function.
+            </p>
           </Col>
 
         </FormGroup>

@@ -1,5 +1,5 @@
 import Wallet from "ethers-wallet";
-
+import {simpleEncode} from "ethereumjs-abi";
 
 /**
  * Get an Ethereum public address from a private key.
@@ -19,6 +19,17 @@ export function getAddressFromPrivateKey(privateKey) {
 }
 
 /**
+ * Calculate the nonce for the next outbound transaction from the address.
+ *
+ * @param txCount How many tx the address has sent
+ * @param testnetOffset 0x100000 for Ropsten, http://ethereum.stackexchange.com/questions/3215/testnet-first-transaction-nonce
+ * @param internalOffset Always increase +1 when sends a tx
+ */
+export function calculateNonce(txCount, testnetOffset, internalOffset) {
+    return txCount + testnetOffset+ internalOffset;
+}
+
+/**
  * Build a raw transaction calling a contract function.
  *
  * @param contractAddress Contracts's address as hexadecimal string
@@ -30,7 +41,7 @@ export function getAddressFromPrivateKey(privateKey) {
  * @param gasLimit as a stringed number (optional)
  * @param gasPrice as a stringed number (optional)
  */
-export function buildTx(contractAddress, privateKey, nonce, functionSignature, functionParameters, value, gasLimit, gasPrice) {
+export function buildTx({contractAddress, privateKey, nonce, functionSignature, functionParameters, value, gasLimit, gasPrice}) {
 
     let wallet = new Wallet(privateKey);
 
@@ -39,21 +50,37 @@ export function buildTx(contractAddress, privateKey, nonce, functionSignature, f
     }
 
     if(!value) {
-        value = 0;
+        value = "0x0";
     }
 
     if(!gasPrice) {
         // Ropsten testnet 2017-01
-        gasPrice = "20000000000";
+        gasPrice = "0x4a817c800"; // 20000000000
     }
 
-    // Sign transactions
-    tx = wallet.sign({
-        none: nonce,
+    if(nonce === undefined) {
+        throw new Error("Cannot send a transaction without a nonce.")
+    }
+
+    // Construct function call data payload using ethereumjs-abi
+    // https://github.com/ethereumjs/ethereumjs-abi
+    const params = functionParameters.split(",").filter((x) => x.trim());
+    const signatureArgs = [functionSignature].concat(params);
+    const encoded = "0x" + simpleEncode.apply(this, signatureArgs).toString("hex");
+
+    const txData = {
+        nonce: nonce,
         to: contractAddress,
         gasLimit: gasLimit,
         gasPrice: gasPrice,
-        value: value
-    });
+        value: value,
+        data: encoded,
+    };
 
+    console.log("Transaction data", txData);
+
+    // Sign transactions
+    let tx = wallet.sign(txData);
+
+    return tx;
 }

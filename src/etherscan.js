@@ -8,6 +8,11 @@ import Web3 from 'web3';
 
 const web3 = new Web3();
 
+/** Throw when API call failes. */
+export class APIError extends Error {
+};
+
+
 export class API {
 
   constructor(baseURL, apiKey) {
@@ -30,6 +35,11 @@ export class API {
 
     let response = await fetch(this.baseURL + "?" + query);
     let data = await response.json();
+
+    if(data.error) {
+      // {"jsonrpc":"2.0","error":{"code":-32010,"message":"Insufficient funds. Account you try to send transaction from does not have enough funds. Required 62914560000000000 and got: 37085440000000000.","data":null},"id":1}
+      throw new APIError(data.error.message);
+    }
 
     console.log("API result", data);
     return data.result;
@@ -58,7 +68,7 @@ export class API {
   }
 
   /**
-   * Get sent transaction count.
+   * Get sent transaction count, including transactions in memory pool.
    *
    * Also can be used as a nonce.
    *
@@ -70,9 +80,30 @@ export class API {
       module: "proxy",
       action: "eth_GetTransactionCount",
       address: address,
+      tag: "pending",
+    };
+    return await this.makeRequest(params);
+  }
+
+  /**
+   * Push out a raw signed transaction
+   *
+   * @param data Transaction as hex
+   * @return tx hash
+   */
+  async sendRaw(data) {
+
+    if(!data.startsWith("0x")) {
+      throw new Error("Data does not look like 0x hex string:" + data);
+    }
+
+    let params = {
+      apikey: this.apiKey,
+      module: "proxy",
+      action: "eth_sendRawTransaction",
+      hex: data,
       tag: "latest",
     };
-    const count = await this.makeRequest(params);
-    return count;
+    return await this.makeRequest(params);
   }
 };
