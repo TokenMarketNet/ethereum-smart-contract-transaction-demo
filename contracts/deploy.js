@@ -40,7 +40,6 @@ try {
   return;
 }
 
-
 console.log("Deploying the contract");
 let contract = SampleContract.new({from: web3.eth.coinbase, gas: 1000000, data: code});
 

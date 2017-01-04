@@ -13,6 +13,7 @@ class App extends React.Component {
     let store = this.store;
 
     return (
+
       <Grid>
         <Row>
           <Col md={12}>

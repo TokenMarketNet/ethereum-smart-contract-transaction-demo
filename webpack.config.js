@@ -5,7 +5,7 @@ const HtmlWebpackPlugin = require('html-webpack-plugin');
 const NpmInstallPlugin = require('npm-install-webpack-plugin');
 const CleanWebpackPlugin = require('clean-webpack-plugin');
 const ExtractTextPlugin = require('extract-text-webpack-plugin');
-
+const AsyncAwaitPlugin = require('webpack-async-await') ;
 
 const pkg = require('./package.json');
 const TARGET = process.env.npm_lifecycle_event;
@@ -24,6 +24,10 @@ const common = {
     extensions: ['', '.js', '.jsx'],
   },
   module: {
+    preLoaders: [
+        { test: /\.json$/, loader: 'json'},
+    ],
+
     loaders: [
       {
         test: /\.(jpg|png)$/,
@@ -53,8 +57,10 @@ const common = {
   },
   plugins: [
     new HtmlWebpackPlugin({
-      title: 'offlinetx',
+      title: 'ethereum-tx-demo',
     }),
+
+    new AsyncAwaitPlugin(),
   ],
 };
 
@@ -76,6 +82,7 @@ if (TARGET === 'start' || !TARGET) {
       port: process.env.PORT,
     },
     module: {
+
       loaders: [
         // Define dev-specific CSS setup
         {
@@ -93,6 +100,8 @@ if (TARGET === 'start' || !TARGET) {
           },
           include: PATHS.src,
         },
+
+
       ],
     },
     plugins: [

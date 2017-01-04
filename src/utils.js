@@ -1,3 +1,4 @@
+import Wallet from "ethers-wallet";
 
 // http://stackoverflow.com/a/901144/315168
 export function getQueryParameterByName(name, url) {
@@ -12,6 +13,21 @@ export function getQueryParameterByName(name, url) {
     return decodeURIComponent(results[2].replace(/\+/g, " "));
 }
 
+/**
+ * Get an Etheruem public address
+ *
+ * @param privateKey Private key as 32 bytes hexadecimal string starting 0x
+ *
+ * @return 0x hexadecimal address or null if the private key is invalid.
+ */
+export function getAddressFromPrivateKey(privateKey) {
+    try {
+        let wallet = new Wallet(privateKey);
+        return wallet.address;
+    } catch(e) {
+        return null;
+    }
+}
 
 export function buildTx(functionSignature, functionParameters) {
 

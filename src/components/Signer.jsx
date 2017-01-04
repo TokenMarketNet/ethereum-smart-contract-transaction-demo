@@ -1,19 +1,30 @@
 import React from 'react';
 import { observer } from 'mobx-react';
-import { observable } from 'mobx';
+import { observable, action } from 'mobx';
 import { Form, FormGroup, FormControl, Button, Col, ControlLabel } from 'react-bootstrap';
-import { getQueryParameterByName}  from "../utils";
+import { getQueryParameterByName, getAddressFromPrivateKey}  from "../utils";
+import AccountInfo from "./AccountInfo";
+
 
 // Fetch signer state from URL/localStorage on app init
-let url = window.location.href;
+const url = window.location.href;
+
+
+let privateKey = getQueryParameterByName("privateKey", url) || window.localStorage.getItem("privateKey") || "";
+
+// Define the state of the signing demo componen
 let state = observable({
-  privateKey: getQueryParameterByName("privateKey", url) || window.localStorage.getItem("privateKey") || "",
-  contractAddress: getQueryParameterByName("privateKey", url) || window.localStorage.getItem("contractAddress") || "",
+  apiURL: "https://testnet.etherscan.io/api",
+  privateKey: privateKey,
+  contractAddress: getQueryParameterByName("privateKey", url) || window.localStorage.getItem("contractAddress") || "0xe0b79b3d705cd09435475904bf54520929eae4e8",
   apiKey: getQueryParameterByName("apiKey", url) || window.localStorage.getItem("apiKey") || "",
   functionSignature: window.localStorage.getItem("functionSignature") || "setAmount(uint)",
   functionParameters: window.localStorage.getItem("functionParameters") || "2000",
+  address: getAddressFromPrivateKey(privateKey) || "",
+  balance: "",
   rawTx: "",
 });
+
 
 // Show the built and sent transaction
 function TransactionData({ state }) {
@@ -42,6 +53,7 @@ function TransactionData({ state }) {
 function Signer() {
 
   function sendTransaction() {
+    let rawTx = build
   }
 
   function onChange(event) {
@@ -55,6 +67,12 @@ function Signer() {
 
     // Store to survive refresh
     window.localStorage.setItem(name, value);
+  }
+
+  async function onPrivateKeyChange(event) {
+    onChange(event);
+    state.address = getAddressFromPrivateKey(state.privateKey) || "";
+    updateBalance();
   }
 
   return (
@@ -95,7 +113,7 @@ function Signer() {
         </Col>
 
         <Col sm={10}>
-          <FormControl type="text" value={state.privateKey} onChange={onChange} />
+          <FormControl type="text" value={state.privateKey} onChange={onPrivateKeyChange} />
         </Col>
 
       </FormGroup>
@@ -127,23 +145,7 @@ function Signer() {
 
       <Button bsStyle="primary" onClick={sendTransaction}>Send transaction</Button>
 
-      <hr />
-
-      <h3>Private key account information</h3>
-
-      <FormGroup controlId="balance">
-
-        <Col componentClass={ControlLabel} sm={2}>
-          Account balance (ETH)
-        </Col>
-
-        <Col sm={10}>
-          <FormControl type="text" value={state.balance} disabled />
-
-          <p className="text-muted">Automatically fetches Ethereum account balance when private key is fillde in.</p>
-        </Col>
-
-      </FormGroup>
+      <AccountInfo state={state} />
 
       {state.rawTx && <TransactionData />}
 
