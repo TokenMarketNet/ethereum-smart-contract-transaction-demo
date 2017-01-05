@@ -28,7 +28,7 @@ class Signer extends React.Component {
     this.state = observable({
       apiURL: "https://testnet.etherscan.io/api",
       privateKey: privateKey,
-      contractAddress: getQueryParameterByName("privateKey", url) || window.localStorage.getItem("contractAddress") || "0xe0b79b3d705cd09435475904bf54520929eae4e8",
+      contractAddress: getQueryParameterByName("contractAddress", url) || window.localStorage.getItem("contractAddress") || "0xe0b79b3d705cd09435475904bf54520929eae4e8",
       apiKey: getQueryParameterByName("apiKey", url) || window.localStorage.getItem("apiKey") || "H5UWCMQKZZ6YC5CZ3BIC4DP67AKCDQNSNQ",
       functionSignature: window.localStorage.getItem("functionSignature") || "setValue(uint)",
       functionParameters: window.localStorage.getItem("functionParameters") || "2000",
