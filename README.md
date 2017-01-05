@@ -10,6 +10,8 @@ All private keys are held 100% on the client side and transaction is constructed
 
 We use both command line Node.js tools and browser based JavaScript in this demo.
 
+![https://raw.githubusercontent.com/TokenMarketNet/ethereum-smart-contract-transaction-demo/master/images/screenshot.png]
+
 ## View demo
 
 If you do not wish to run the React app locally you have one free-to-use app available here:

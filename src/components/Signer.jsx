@@ -29,7 +29,7 @@ class Signer extends React.Component {
       apiURL: "https://testnet.etherscan.io/api",
       privateKey: privateKey,
       contractAddress: getQueryParameterByName("privateKey", url) || window.localStorage.getItem("contractAddress") || "0xe0b79b3d705cd09435475904bf54520929eae4e8",
-      apiKey: getQueryParameterByName("apiKey", url) || window.localStorage.getItem("apiKey") || "",
+      apiKey: getQueryParameterByName("apiKey", url) || window.localStorage.getItem("apiKey") || "H5UWCMQKZZ6YC5CZ3BIC4DP67AKCDQNSNQ",
       functionSignature: window.localStorage.getItem("functionSignature") || "setValu(uint)",
       functionParameters: window.localStorage.getItem("functionParameters") || "2000",
       address: getAddressFromPrivateKey(privateKey) || "",
@@ -163,8 +163,11 @@ class Signer extends React.Component {
 
         <h1>Build a smart contract transaction</h1>
 
+        <p className="lead">
+          This is a tutorial application showing how to create Ethereum transactions in a web browser. See the related blog post for more information.
+        </p>
+
         <p>
-          Ethereum Ropsten testnet only. &nbsp;
           <a href="https://github.com/TokenMarketNet/ethereum-smart-contract-transaction-demo">View source code on Github</a>. &nbsp;
           <a href="">Read tutorial blog post</a>.
         </p>
@@ -248,6 +251,8 @@ class Signer extends React.Component {
         </FormGroup>
 
         <Button bsStyle="primary" onClick={sendTransaction}>Send transaction</Button>
+
+        <p className="text-info">Ethereum Ropsten test network only.</p>
 
         {state.rawTx && <TransactionData state={state} />}
 
