@@ -2,3 +2,4 @@ node_modules
 dist
 .node-xmlhttprequest-*
 npm-debug.log
+build

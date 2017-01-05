@@ -2,13 +2,19 @@
  
 ## Introduction 
  
-This a tutorial blog post and demo app demostrates how to deploy an Ethereum smart contract and call arbitrary contract functions from a web user interface. For the deployment of the contract Go Ethereum is used. For the API calls Etherscan.IO API service is used.
+This a tutorial blog post and demo app showing how to deploy an Ethereum smart contract and transacting with this contract from a web user interface. For the deployment of the contract Go Ethereum is used. For the API calls Etherscan.IO API service is used.
 
 There is a demo app written using React and Bootstrap. The application is coded in ECMAScript 2016 and wrapped together using Webpack.
 
-All keys are held 100% client side and transaction is constructed in JavaScript, making the example optimal to follow if you are working with non-custodian wallets or Dapps. 
+All private keys are held 100% on the client side and transaction is constructed in JavaScript, making the example optimal to follow if you are working with non-custodian wallets or Dapps. 
 
 We use both command line Node.js tools and browser based JavaScript in this demo.
+
+## View demo
+
+If you do not wish to run the React app locally you have one free-to-use app available here:
+
+[ethereum-transaction-toy.tokenmarket.net](https://ethereum-transaction-toy.tokenmarket.net/)
 
 ## Prerequisites
 
@@ -30,7 +36,7 @@ You need to be comfortable in advanced JavaScript programming. You need to have 
 
 ## Getting started 
 
-Clone the Github repository.
+Clone the [Github repository](https://github.com/TokenMarketNet/ethereum-smart-contract-transaction-demo).
 
 Install Node version 7.2.1 or later. Use [nvm](https://github.com/creationix/nvm) script to make this easy for you.
 
@@ -121,6 +127,8 @@ contract SampleContract {
 ```
 
 ## Deploying a contract
+
+**Note**: You can skip this step if you want as there is already a deployed test contract [here](https://testnet.etherscan.io/address/0xe0b79b3d705cd09435475904bf54520929eae4e8).
 
 You need to have
 
@@ -223,8 +231,13 @@ waitBlock();
 
 ## Building a contract call
 
-Now when your contract is deployed, you have a private key to your account, you have your Etherscan.io API key, you can make some calls to 
+Now when your contract is deployed, you have a private key to your account, you have your Etherscan.io API key, you can make some calls to the contract.
 
+## Developing app locally
+
+If you wish to edit this application and use it as a starting point for your own product you can run WebPack automatically reloading development server locally:
+
+    npm start
 
 ## Used components
 

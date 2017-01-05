@@ -9,24 +9,24 @@ import {simpleEncode} from "ethereumjs-abi";
  * @return 0x hexadecimal address or null if the private key is invalid.
  */
 export function getAddressFromPrivateKey(privateKey) {
-    try {
-        let wallet = new Wallet(privateKey);
-        return wallet.address;
-    } catch(e) {
-        console.error(e);
-        return null;
-    }
+  try {
+    let wallet = new Wallet(privateKey);
+    return wallet.address;
+  } catch (e) {
+    console.error(e);
+    return null;
+  }
 }
 
 /**
  * Calculate the nonce for the next outbound transaction from the address.
  *
  * @param txCount How many tx the address has sent
- * @param testnetOffset 0x100000 for Ropsten, http://ethereum.stackexchange.com/questions/3215/testnet-first-transaction-nonce
+ * @param testnetOffset 0 for Ropsten, used to be a thing for the old test network.
  * @param internalOffset Always increase +1 when sends a tx
  */
 export function calculateNonce(txCount, testnetOffset, internalOffset) {
-    return txCount + testnetOffset + internalOffset;
+  return txCount + testnetOffset + internalOffset;
 }
 
 /**
@@ -43,44 +43,44 @@ export function calculateNonce(txCount, testnetOffset, internalOffset) {
  */
 export function buildTx({contractAddress, privateKey, nonce, functionSignature, functionParameters, value, gasLimit, gasPrice}) {
 
-    let wallet = new Wallet(privateKey);
+  let wallet = new Wallet(privateKey);
 
-    if(!gasLimit) {
-        gasLimit = "0x300000";
-    }
+  if (!gasLimit) {
+    gasLimit = "0x300000";
+  }
 
-    if(!value) {
-        value = "0x0";
-    }
+  if (!value) {
+    value = "0x0";
+  }
 
-    if(!gasPrice) {
-        // Ropsten testnet 2017-01
-        gasPrice = "0x4a817c800"; // 20000000000
-    }
+  if (!gasPrice) {
+    // Ropsten testnet 2017-01
+    gasPrice = "0x4a817c800"; // 20000000000
+  }
 
-    if(nonce === undefined) {
-        throw new Error("Cannot send a transaction without a nonce.")
-    }
+  if (nonce === undefined) {
+    throw new Error("Cannot send a transaction without a nonce.")
+  }
 
-    // Construct function call data payload using ethereumjs-abi
-    // https://github.com/ethereumjs/ethereumjs-abi
-    const params = functionParameters.split(",").filter((x) => x.trim());
-    const signatureArgs = [functionSignature].concat(params);
-    const encoded = "0x" + simpleEncode.apply(this, signatureArgs).toString("hex");
+  // Construct function call data payload using ethereumjs-abi
+  // https://github.com/ethereumjs/ethereumjs-abi
+  const params = functionParameters.split(",").filter((x) => x.trim());
+  const signatureArgs = [functionSignature].concat(params);
+  const encoded = "0x" + simpleEncode.apply(this, signatureArgs).toString("hex");
 
-    const txData = {
-        nonce: nonce,
-        to: contractAddress,
-        gasLimit: gasLimit,
-        gasPrice: gasPrice,
-        value: value,
-        data: encoded,
-    };
+  const txData = {
+    nonce: nonce,
+    to: contractAddress,
+    gasLimit: gasLimit,
+    gasPrice: gasPrice,
+    value: value,
+    data: encoded,
+  };
 
-    console.log("Transaction data", txData);
+  console.log("Transaction data", txData);
 
-    // Sign transactions
-    let tx = wallet.sign(txData);
+  // Sign transactions
+  let tx = wallet.sign(txData);
 
-    return tx;
+  return tx;
 }

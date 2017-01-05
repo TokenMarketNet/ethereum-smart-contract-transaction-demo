@@ -60,7 +60,7 @@ class AccountInfo extends React.Component {
           <Col sm={10}>
             <FormControl type="text" value={state.balance} disabled />
 
-            <p className="text-muted">Balance the address of the private key holds.</p>
+            <p className="text-muted">Balance of the address abovegi.</p>
           </Col>
 
         </FormGroup>

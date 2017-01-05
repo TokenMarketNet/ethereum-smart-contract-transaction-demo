@@ -57,7 +57,7 @@ const common = {
   },
   plugins: [
     new HtmlWebpackPlugin({
-      title: 'ethereum-tx-demo',
+      title: 'Ethereum Transaction Building Demo',
     }),
 
     new AsyncAwaitPlugin(),
