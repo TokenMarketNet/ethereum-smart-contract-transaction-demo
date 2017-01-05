@@ -30,7 +30,7 @@ class Signer extends React.Component {
       privateKey: privateKey,
       contractAddress: getQueryParameterByName("privateKey", url) || window.localStorage.getItem("contractAddress") || "0xe0b79b3d705cd09435475904bf54520929eae4e8",
       apiKey: getQueryParameterByName("apiKey", url) || window.localStorage.getItem("apiKey") || "H5UWCMQKZZ6YC5CZ3BIC4DP67AKCDQNSNQ",
-      functionSignature: window.localStorage.getItem("functionSignature") || "setValu(uint)",
+      functionSignature: window.localStorage.getItem("functionSignature") || "setValue(uint)",
       functionParameters: window.localStorage.getItem("functionParameters") || "2000",
       address: getAddressFromPrivateKey(privateKey) || "",
       balance: "",
