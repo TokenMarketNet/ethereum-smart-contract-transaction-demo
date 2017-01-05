@@ -26,7 +26,7 @@ export function getAddressFromPrivateKey(privateKey) {
  * @param internalOffset Always increase +1 when sends a tx
  */
 export function calculateNonce(txCount, testnetOffset, internalOffset) {
-    return txCount + testnetOffset+ internalOffset;
+    return txCount + testnetOffset + internalOffset;
 }
 
 /**

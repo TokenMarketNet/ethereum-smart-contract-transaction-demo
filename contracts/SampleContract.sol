@@ -6,7 +6,7 @@ contract SampleContract {
     uint public value;
 
     // Anyone can call this contract and override the value of the previous caller
-    function setValue(uint value_) public {
+    function setValue(uint256 value_) public {
         value = value_;
     }
 

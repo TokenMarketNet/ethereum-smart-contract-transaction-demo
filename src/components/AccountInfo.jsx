@@ -22,9 +22,11 @@ class AccountInfo extends React.Component {
 
     function increaseNonce() {
       state.nonceOffset++;
-      state.nonce = calculateNonce(state.baseNonce, 0x100000, state.nonceOffset);
+      state.nonce = calculateNonce(state.baseNonce, state.testnetOffset, state.nonceOffset);
     }
     increaseNonce = action(increaseNonce);
+
+    const hexNonce = "0x" + state.nonce.toString(16);
 
     return (
       <div>
@@ -70,9 +72,9 @@ class AccountInfo extends React.Component {
           </Col>
 
           <Col sm={10}>
-            <FormControl type="text" value={state.nonce} disabled />
+            <FormControl type="text" value={hexNonce} disabled />
 
-            <p className="text-muted">Each transaction must have a nonce higher than previous one.</p>
+            <p className="text-muted">Each transaction must have a nonce one higher than previous one.</p>
           </Col>
 
         </FormGroup>
@@ -82,7 +84,7 @@ class AccountInfo extends React.Component {
         </Button>
 
         <p className="text-muted">
-          Helps to troubleshoot issues when sending multiple transactions sequentially.
+          Helps to troubleshoot issues when sending multiple transactions sequentially. If there is a gap in the nonce sequence the transaction silently disappers from the tranasaction pool or never shows in the blockchain explorer.
         </p>
 
       </div>

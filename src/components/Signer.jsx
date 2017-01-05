@@ -30,7 +30,7 @@ class Signer extends React.Component {
       privateKey: privateKey,
       contractAddress: getQueryParameterByName("privateKey", url) || window.localStorage.getItem("contractAddress") || "0xe0b79b3d705cd09435475904bf54520929eae4e8",
       apiKey: getQueryParameterByName("apiKey", url) || window.localStorage.getItem("apiKey") || "",
-      functionSignature: window.localStorage.getItem("functionSignature") || "setAmount(uint)",
+      functionSignature: window.localStorage.getItem("functionSignature") || "setAmount(uint256)",
       functionParameters: window.localStorage.getItem("functionParameters") || "2000",
       address: getAddressFromPrivateKey(privateKey) || "",
       balance: "",
@@ -40,7 +40,8 @@ class Signer extends React.Component {
       sendError: null, //
       sentTxHash: null, // Point to etherscan.io tx
       baseNonce: 0, // How many txs has gone out from the address
-      nonceOffset: 1, // Maintain internal state of added nonces, because Etherscan getTransactionCount() cannot seem to be able to deal very well with uncorfirmed txs
+      nonceOffset: 0, // Maintain internal state of added nonces, because Etherscan getTransactionCount() cannot seem to be able to deal very
+      testnetOffset: 0, // What is the nonce start point for the current network   0x100000
     });
   }
 
@@ -58,30 +59,32 @@ class Signer extends React.Component {
   sendTransaction() {
     const updateAddressData = this.updateAddressData.bind(this);
     let state = this.state;
+
     state.rawTx = buildTx(state);
+    state.sentTxHash = null;
+    state.sendError = null;
 
     async function _send() {
+      state.sendStatus = true;
+      const api = new API(state.apiURL, state.apiKey);
 
-      if(state.apiKey) {
-        state.sendStatus = true;
-        const api = new API(state.apiURL, state.apiKey);
-
-
-        try {
-          state.sentTxHash = await api.sendRaw(state.rawTx);
-          state.sendError = null;
-          console.log("Transaction sent, hash", state.sentTxHash);
-        } catch(e) {
-          state.sendError = "" + e;
-          console.log(e);
-        }
-
-        await updateAddressData();
-        state.sendStatus = false;
+      try {
+        state.sentTxHash = await api.sendRaw(state.rawTx);
+        console.log("Transaction sent, hash", state.sentTxHash);
+        state.nonceOffset += 1;
+      } catch(e) {
+        state.sendError = "" + e;
+        console.log(e);
       }
+
+      await updateAddressData();
+      state.sendStatus = false;
     }
 
-    _send();
+    // Sent tx offline
+    if(state.apiKey) {
+      _send();
+    }
   }
 
   // Update data about the address after fetched over API
@@ -121,8 +124,7 @@ class Signer extends React.Component {
       state.baseNonce = parseInt(state.baseNonce, 16);
     }
 
-    state.nonceOffset += 1;
-    const nonce = calculateNonce(state.baseNonce, 0x100000, state.nonceOffset);
+    const nonce = calculateNonce(state.baseNonce, state.testnetOffset, state.nonceOffset);
 
     this.setAddressData(address, balance, nonce);
   }
@@ -161,7 +163,11 @@ class Signer extends React.Component {
 
         <h1>Build a smart contract transaction</h1>
 
-        <p>Ethereum Ropsten testnet only</p>
+        <p>
+          Ethereum Ropsten testnet only. &nbsp;
+          <a href="https://github.com/TokenMarketNet/ethereum-smart-contract-transaction-demo">View source code on Github</a>. &nbsp;
+          <a href="">Read tutorial blog post</a>.
+        </p>
 
         <FormGroup controlId="apiKey">
 
@@ -220,11 +226,15 @@ class Signer extends React.Component {
 
           <Col sm={10}>
             <FormControl type="text" value={state.functionSignature} onChange={onChange} />
+
+            <p className="text-muted">
+              See examples in <a target="_blank" href="https://github.com/ethereumjs/ethereumjs-abi">ethereumjs-abi</a>.
+            </p>
           </Col>
 
         </FormGroup>
 
-        <FormGroup controlId="functionSignature">
+        <FormGroup controlId="functionParameters">
 
           <Col componentClass={ControlLabel} sm={2}>
             Function parameters

@@ -2,6 +2,8 @@ import React from 'react';
 import { observer } from 'mobx-react';
 import Signer from './Signer';
 import { Header, Navbar, Alert, Tabs, Tab, Grid, Row, Col } from 'react-bootstrap';
+import logo from '../../images/logo.png';
+
 
 @observer
 class App extends React.Component {
@@ -22,7 +24,7 @@ class App extends React.Component {
                 <Navbar>
                   <Navbar.Header>
                     <Navbar.Brand>
-                      <a href="#">Ethereum Smart Contract Transaction Building Toy</a>
+                      <a href="https://tokenmarket.net"><img className="logo" src={logo} /></a> Ethereum Transction Toy
                     </Navbar.Brand>
                   </Navbar.Header>
                 </Navbar>
