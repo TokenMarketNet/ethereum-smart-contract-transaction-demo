@@ -18,6 +18,8 @@ If you do not wish to run the React app locally you have one free-to-use app ava
 
 [ethereum-transaction-toy.tokenmarket.net](https://ethereum-transaction-toy.tokenmarket.net/)
 
+**Note**: Currently demo supports only Chrome and Firefox browsers.
+
 ## Prerequisites
 
 You need to be comfortable in advanced JavaScript programming. You need to have geth (Go-Ethereum) node or any Ethereum node software running in a Ethereum Ropsten testnet. See below how to install and connect to one safely.
