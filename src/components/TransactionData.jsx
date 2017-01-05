@@ -26,6 +26,10 @@ function TransactionData({ state }) {
 
         <Col sm={10}>
           <FormControl componentClass="textarea" value={state.rawTx} disabled />
+
+          <p className="text-muted">
+            If you are doing offline signing you can manually copy-paste this transaction to <a href="https://testnet.etherscan.io">pushTx</a>.
+          </p>
         </Col>
 
       </FormGroup>

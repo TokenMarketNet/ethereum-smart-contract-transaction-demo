@@ -60,7 +60,7 @@ class AccountInfo extends React.Component {
           <Col sm={10}>
             <FormControl type="text" value={state.balance} disabled />
 
-            <p className="text-muted">Balance of the address abovegi.</p>
+            <p className="text-muted">Balance of the address above.</p>
           </Col>
 
         </FormGroup>

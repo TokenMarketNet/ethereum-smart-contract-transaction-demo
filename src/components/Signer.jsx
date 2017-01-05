@@ -30,7 +30,7 @@ class Signer extends React.Component {
       privateKey: privateKey,
       contractAddress: getQueryParameterByName("privateKey", url) || window.localStorage.getItem("contractAddress") || "0xe0b79b3d705cd09435475904bf54520929eae4e8",
       apiKey: getQueryParameterByName("apiKey", url) || window.localStorage.getItem("apiKey") || "",
-      functionSignature: window.localStorage.getItem("functionSignature") || "setAmount(uint256)",
+      functionSignature: window.localStorage.getItem("functionSignature") || "setValu(uint)",
       functionParameters: window.localStorage.getItem("functionParameters") || "2000",
       address: getAddressFromPrivateKey(privateKey) || "",
       balance: "",
@@ -195,7 +195,7 @@ class Signer extends React.Component {
             <FormControl type="text" value={state.contractAddress} onChange={onChange} />
 
             <p className="text-muted">
-              <a target="_blank" href={"https://testnet.etherscan.io/address/" + state.contractAddress}>View on EtherScan.io</a>.
+              <a target="_blank" href={"https://testnet.etherscan.io/address/" + state.contractAddress}>View the contract on EtherScan.io</a>.
             </p>
 
           </Col>
@@ -212,7 +212,7 @@ class Signer extends React.Component {
             <FormControl type="text" value={state.privateKey} onChange={onPrivateKeyChange} />
 
             <p className="text-muted">
-              Derived from a passphrase using sha3() function.
+              Derived from a passphrase using sha3() function. See the tutorial for details.
             </p>
           </Col>
 

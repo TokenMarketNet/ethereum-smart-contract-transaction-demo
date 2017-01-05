@@ -29,6 +29,31 @@ export function calculateNonce(txCount, testnetOffset, internalOffset) {
   return txCount + testnetOffset + internalOffset;
 }
 
+
+/**
+ * Create data field based on smart contract function signature and arguments.
+ *
+ * @param functionSignature E.g. setValue(uint256)
+ * @param functionParameters E.g. A comma separated string. Eg. 200,300
+ * @returns {string} 0x prefixed hex string
+ */
+export function encodeDataPayload(functionSignature, functionParameters) {
+
+  if(typeof functionSignature != "string") {
+    throw new Error("Bad function signature: " + functionSignature);
+  }
+
+  if(typeof functionParameters != "string") {
+    throw new Error("Bad function parameter: " + functionSignature);
+  }
+
+  // Construct function call data payload using ethereumjs-abi
+  // https://github.com/ethereumjs/ethereumjs-abi
+  const params = functionParameters.split(",").filter((x) => x.trim());
+  const signatureArgs = [functionSignature].concat(params);
+  return "0x" + simpleEncode.apply(this, signatureArgs).toString("hex");
+}
+
 /**
  * Build a raw transaction calling a contract function.
  *
@@ -62,11 +87,7 @@ export function buildTx({contractAddress, privateKey, nonce, functionSignature, 
     throw new Error("Cannot send a transaction without a nonce.")
   }
 
-  // Construct function call data payload using ethereumjs-abi
-  // https://github.com/ethereumjs/ethereumjs-abi
-  const params = functionParameters.split(",").filter((x) => x.trim());
-  const signatureArgs = [functionSignature].concat(params);
-  const encoded = "0x" + simpleEncode.apply(this, signatureArgs).toString("hex");
+  const data = encodeDataPayload(functionSignature, functionParameters);
 
   const txData = {
     nonce: nonce,
@@ -74,10 +95,10 @@ export function buildTx({contractAddress, privateKey, nonce, functionSignature, 
     gasLimit: gasLimit,
     gasPrice: gasPrice,
     value: value,
-    data: encoded,
+    data: data,
   };
 
-  console.log("Transaction data", txData);
+  console.log("Transaction parameters", txData);
 
   // Sign transactions
   let tx = wallet.sign(txData);
