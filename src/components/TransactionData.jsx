@@ -44,7 +44,7 @@ function TransactionData({ state }) {
           <Col sm={10}>
             {state.sendStatus && <div><i className="fa fa-spin fa-spinner" /> Sending</div>}
             {state.sendError && <div className="text-danger">Transaction error: {state.sendError}</div>}
-            {state.sentTxHash && <div>Transaction sent: <a target="_blank" href={"https://testnet.etherscan.io/tx/" + state.sentTxHash}>{state.sentTxHash}</a>. It may take up to one minute for the tranasction to appear in the blockchain explorer.</div>}
+            {state.sentTxHash && <div>Transaction sent: <a target="_blank" href={"https://testnet.etherscan.io/tx/" + state.sentTxHash}>{state.sentTxHash}</a>. It may take up to one minute for the transaction to appear in the blockchain explorer.</div>}
           </Col>
 
         </FormGroup>
