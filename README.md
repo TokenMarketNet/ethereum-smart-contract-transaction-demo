@@ -241,7 +241,7 @@ If you wish to edit this application and use it as a starting point for your own
 
     npm start
 
-## Bonus: Calling contract using geth
+## Bonus: Calling contract using web3 and Go-Ethereum JSON-RPC API
 
 You can also call the contract using a command line script.
  
@@ -291,6 +291,7 @@ Here is an example:
 
 * [react-bootstrap](https://react-bootstrap.github.io/)
 
-* [ethereumjs-tx](https://github.com/ethereumjs/ethereumjs-tx)
+* [ethereumjs-abi](https://github.com/ethereumjs/ethereumjs-abi)
 
 * [ethers-wallet](https://www.npmjs.com/package/ethers-wallet)
+
