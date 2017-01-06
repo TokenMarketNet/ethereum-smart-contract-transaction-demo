@@ -141,7 +141,7 @@ if (TARGET === 'build') {
           query: {
             cacheDirectory: true,
             presets: ['react', 'es2015', 'stage-1'],
-            plugins: ['transform-decorators-legacy', 'transform-object-assign', 'array-includes', 'transform-es2015-block-scoping'],
+            plugins: ['transform-decorators-legacy', 'transform-object-assign', 'array-includes'],
           },
           include: PATHS.src,
         },
