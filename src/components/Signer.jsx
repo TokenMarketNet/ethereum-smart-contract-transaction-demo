@@ -169,7 +169,7 @@ class Signer extends React.Component {
 
         <p>
           <a href="https://github.com/TokenMarketNet/ethereum-smart-contract-transaction-demo">View source code on Github</a>. &nbsp;
-          <a href="">Read tutorial blog post</a>.
+          <a href="https://tokenmarket.net/blog/creating-ethereum-smart-contract-transactions-in-client-side-javascript/">Read tutorial blog post</a>.
         </p>
 
         <FormGroup controlId="apiKey">
