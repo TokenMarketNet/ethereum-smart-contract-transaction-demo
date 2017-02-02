@@ -13,7 +13,7 @@ export function getAddressFromPrivateKey(privateKey) {
     let wallet = new Wallet(privateKey);
     return wallet.address;
   } catch (e) {
-    console.error(e);
+    console.error("Could not parse private key ", privateKey, e);
     return null;
   }
 }
@@ -87,7 +87,12 @@ export function buildTx({contractAddress, privateKey, nonce, functionSignature, 
     throw new Error("Cannot send a transaction without a nonce.")
   }
 
-  const data = encodeDataPayload(functionSignature, functionParameters);
+  let data;
+  if(functionSignature && functionParameters) {
+    data = encodeDataPayload(functionSignature, functionParameters);
+  } else {
+    data = undefined;
+  }
 
   const txData = {
     nonce: nonce,
@@ -97,8 +102,6 @@ export function buildTx({contractAddress, privateKey, nonce, functionSignature, 
     value: value,
     data: data,
   };
-
-  console.log("Transaction parameters", txData);
 
   // Sign transactions
   let tx = wallet.sign(txData);

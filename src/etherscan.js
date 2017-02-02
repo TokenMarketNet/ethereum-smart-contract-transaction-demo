@@ -106,4 +106,14 @@ export class API {
     };
     return await this.makeRequest(params);
   }
+
+  async getGasPrice() {
+
+    let params = {
+      apikey: this.apiKey,
+      module: "proxy",
+      action: "eth_gasPrice",
+    };
+    return await this.makeRequest(params);
+  }
 };
