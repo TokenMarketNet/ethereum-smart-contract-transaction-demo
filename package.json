@@ -60,7 +60,7 @@
     "webpack-async-await": "^1.1.0",
     "webpack-dev-server": "^1.14.0",
     "webpack-merge": "^0.14.0",
-    "eslint": "^3.12.2",
+    "eslint": "^6.5.1",
     "eslint-plugin-jsx-a11y": "^2.2.3"
   }
 }
